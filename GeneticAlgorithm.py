@@ -153,8 +153,6 @@ def run(event=None, test=False):
         c = Cities()
         if body_cities:
             c.set_cities(body_cities)
-        else:
-            c.test()  # carrega cidades para testes
 
         cities_list = c.get_cities()
 
