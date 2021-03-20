@@ -1,6 +1,8 @@
 class City():
-    def __init__(self, name, distances):
+    def __init__(self, name, trip_type, detail, distances):
         self.name = name
+        self.trip_type = trip_type
+        self.detail = detail
         self.distances = distances
 
     def getName(self):
@@ -40,10 +42,24 @@ class Cities():
     def get_city(self, index):
         return self.cities[index]
 
-    def set_cities(self, cities=[], distances=[[]]):
+    def set_cities(self, cities={},
+                        #  distances=[[]]
+                         ):
         self.cities = []
-        for i in range(len(cities)):
-            self.cities.append(City(cities[i], distances[i]))
+        for k, v in cities.items():
+            self.cities.append(City(name=k, trip_type=v[0], detail=v[1], distances=v[2]
+                                    # distances[i]
+                                    )
+                                )
 
     def get_total_cities(self):
         return len(self.cities)
+
+class Distance:
+    def __init__(self, cities):
+        self.cities = cities
+
+    def get_distance(self, fromCity: int, toCity: int):
+        city1 = self.cities[fromCity]
+        total_distance = city1.distances[toCity]
+        return total_distance
