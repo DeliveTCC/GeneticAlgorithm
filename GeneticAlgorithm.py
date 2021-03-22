@@ -1,6 +1,7 @@
 from City import Cities
 from Individuals import Individuals
-from random import random
+from random import choices
+import numpy as np
 
 class GeneticAlgorithm():
     def __init__(self, population_size=20, cities=[]):
@@ -18,6 +19,7 @@ class GeneticAlgorithm():
 
         self.best_solution = self.population[0]
 
+    # orderna a população pelo atributo travelled_distance ascendentemente
     def sort_population(self):
         self.population = sorted(self.population,
                                  key=lambda population: population.travelled_distance,
@@ -38,35 +40,30 @@ class GeneticAlgorithm():
             sum += individual.travelled_distance
         return sum
 
-    """
-    Seleciona pais com base na roleta viciada
-    As cidades com menores distâncias são as que possuem maior chances de ser sorteadas
-    Distância e probabilidade são inversamente proporcionais (quanto menor a distância, maior a chance)
-    """
-
     def select_parents(self, sum_travelled_distances):
-        total_coefficient = 0
+        """
+        Este método seleciona pais com base na roleta viciada onde,
+        sendo a escolha aleatória, indivíduos com as menores distâncias percorridas
+        possuem maior probabilidade de serem escolhidos.
+
+        Os pesos são inversamente proporcionais à distância percorrida
+        weight = 1-(travelled_distance / total_travelled_distance)
+        Sendo:
+            total_travelled_distance: a soma de todas as travelled_distance da população
+        """
         parent = -1  # nenhum indivíduo sorteado
-        sum = 0
-        i = 0
+        total_travelled_distance = 0
 
-        # criamos um coeficiente baseado na probabilidade do indivíduo ser selecionado e somamos
         for index in range(len(self.population)):
-            total_coefficient += (1 / self.population[index].travelled_distance)
+            distance = self.population[index].travelled_distance
+            if distance != np.inf:
+                total_travelled_distance += distance
 
-        # geramos as probabilidades
-        for i_ in range(len(self.population)):
-            coefficient = (1 / self.population[i_].travelled_distance)
-            self.population[i_].probability = (coefficient / total_coefficient)
-
-        sortedValue = random()  # sorteamos um número da roleta (0 - 1) --> 0% a 100%
-
-        self.sort_population()
-        while i < len(self.population) and sum < sortedValue:
-            sum += self.population[i].probability
-            parent += 1
-            i += 1
-        return parent
+        weights = [(1-(p.travelled_distance/total_travelled_distance)) if p.travelled_distance!=np.inf else 0 for p in self.population]
+        
+        parent = choices(range(len(self.population)), weights, k=1)
+        
+        return parent[0]
 
     def resolve(self, mutationRate, generations, time_distances, cities):
         self.init_population(time_distances, cities)
@@ -78,6 +75,7 @@ class GeneticAlgorithm():
         for generation in range(generations):
             sum_travelled_distance = self.sum_travelled_distance()
             newPopulation = []
+            print("\n")
 
             for i in range(0, self.populationSize, 2):
                 # seleciona dois indivíduos para reprodução - cai na roleta
@@ -135,19 +133,31 @@ def run(event=None, test=False):
         event = {
             'populationSize':20,
             "mutationRate":1,
-            "generations":2,
-            'cities':{"a":["orig", "c", [0, 1, 2, 5]],
-                    "b":["orig", "d", [1, 0, 4, 5]],
-                    "c":["dest", "a", [2, 4, 0, 6]],
-                    "d":["dest", "b", [5, 5, 6, 0]],
+            "generations":1000,
+            'matrix':{'a':["deliveryMan", None, [0, 1, 3, 7, None]],
+                    "b":["collect", "c", [1, 0, 2, 4, 5]],
+                    "c":["collect", "d", [3, 2, 0, 5, None]],
+                    "d":["delivery", "a", [7, 4, None, 0, 6]],
+                    "e":["delivery", "b", [None, 5, 5, 6, 0]],
                     },
         }
-
+        # event = {
+        #     'populationSize':20,
+        #     "mutationRate":1,
+        #     "generations":3000,
+        #     'matrix':{'a':["dman", "b", [0, 1, 3, 7, None]],
+        #               "b":["orig", "c", [1, 0, 2, 4, 5]],
+        #               "c":["orig", "d", [3, 2, 0, 5, None]],
+        #               "d":["dest", "a", [7, 4, None, 0, 6]],
+        #               "e":["dest", "b", [None, 5, 5, 6, 0]],
+        #             },
+        # }
+    
     if event:
         population_size = int(event['populationSize'])
         mutation_rate = int(event["mutationRate"])
         generations = int(event["generations"])
-        body_cities = event['cities']
+        body_cities = event['matrix']
 
     try:
         c = Cities()

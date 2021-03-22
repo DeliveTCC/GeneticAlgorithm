@@ -1,8 +1,11 @@
+import numpy as np
+
 class City():
     def __init__(self, name, trip_type, detail, distances):
         self.name = name
         self.trip_type = trip_type
         self.detail = detail
+        distances = [np.inf if d is None else d for d in distances]
         self.distances = distances
 
     def getName(self):
@@ -31,15 +34,11 @@ class Cities():
     def get_city(self, index):
         return self.cities[index]
 
-    def set_cities(self, cities={},
-                        #  distances=[[]]
-                         ):
+    def set_cities(self, cities={}):
         self.cities = []
         for k, v in cities.items():
-            self.cities.append(City(name=k, trip_type=v[0], detail=v[1], distances=v[2]
-                                    # distances[i]
-                                    )
-                                )
+            c = City(name=k, trip_type=v[0], detail=v[1], distances=v[2])
+            self.cities.append(c)
 
     def get_total_cities(self):
         return len(self.cities)
