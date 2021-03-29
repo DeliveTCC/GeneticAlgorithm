@@ -23,18 +23,20 @@ class Individuals():
         # Adicionando ponto de partida que é a localição do DeliveryMan
         for i in range(len(cities_copy)):
             if cities_copy[i].trip_type == "deliveryMan":
+                
                 names_aux.append(cities_copy[i].name)
+                
+                collect_point = cities_copy[i].detail
+                names_aux.append(collect_point)
+
                 self.chromosome.append(cities_copy.pop(i)._index)
+
+                # Adicionando ponto de destino do deliveryMan
+                for j in range(len(cities_copy)):
+                    if cities_copy[j].name == collect_point:
+                        self.chromosome.append(cities_copy.pop(j)._index)
+                        break
                 break
-
-        # # Adicionando o segundo ponto que é o de coleta mais próximo do DeliveryMan
-        # for i in range(len(cities_copy)):
-        #     if cities_copy[i].trip_type == "deliveryMan":
-        #         names_aux.append(cities_copy[i].name)
-        #         self.chromosome.append(cities_copy.pop(i)._index)
-
-        # names_aux.append(cities_copy[0].name)
-        # self.chromosome.append(cities_copy.pop(0)._index)
 
         while len(cities_copy) > 0:
             city = randint(0, len(cities_copy) - 1)

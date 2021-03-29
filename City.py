@@ -48,6 +48,8 @@ class Distance:
         self.cities = cities
 
     def get_distance(self, fromCity: int, toCity: int):
-        city1 = self.cities[fromCity]
-        total_distance = city1.distances[toCity]
-        return total_distance
+        if fromCity == toCity:
+            return 0
+        else:
+            city1 = self.cities[fromCity]
+            return city1.distances[toCity]

@@ -72,7 +72,12 @@ class GeneticAlgorithm():
 
         self.sort_population()
 
-        for generation in range(generations):
+        generation = 0
+        # for generation in range(generations):
+        while generation < generations:
+            if (generation == (generations-1)) & (self.best_solution.travelled_distance == np.inf):
+                generations += 1
+                
             sum_travelled_distance = self.sum_travelled_distance()
             newPopulation = []
             print("\n")
@@ -94,14 +99,16 @@ class GeneticAlgorithm():
             for individual in self.population:
                 individual.fitness()
                 # Uncomment do debug
-                print("Generation: %s New population: %s - Travelled Distance: %s" %
-                      (generation, individual.chromosome, individual.travelled_distance))
+                # print(f"Generation: {generation} New population: {individual.chromosome} - Travelled Distance: {individual.travelled_distance}")
+                print(f"Generation: {generation} - Travelled Distance: {individual.travelled_distance}")
 
             # ordena população para melhor solução estar na primeira posição
             self.sort_population()
 
             best = self.population[0]
             self.best_individual(best)
+            
+            generation += 1
 
         print("\nMelhor solução -> G: %s - Distância percorrida: %s - Cromossomo: %s" % (
             self.best_solution.generation,
