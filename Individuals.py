@@ -2,7 +2,7 @@ from random import randint
 from City import Distance
 
 class Individuals():
-    def __init__(self, time_distances, cities, generation=0):
+    def __init__(self, time_distances, cities, generation=0, init_chromosome=True):
         self.time_distances = time_distances  # 2D array [[], []]
         self.cities = cities  # City list [City(), City()]
         self.generation = generation
@@ -12,6 +12,7 @@ class Individuals():
         self.travelled_distance = 0
         self.probability = 0
 
+        # if init_chromosome:
         # Cria cromossomos (não repete cidades)
         # Ex.: [0, 2, 3, 1] --> [A, C, D, B]
         cities_copy = self.cities.copy()
@@ -66,12 +67,11 @@ class Individuals():
 
         self.travelled_distance = sum_distance
 
-    """
-    Alteração dos cromossomos para trazer diversidade nas gerações
-    Sorteia um gene no cromossomo e realiza a troca, respeitando o critério de não conter genes duplicados.
-    """
-
     def crossover(self, otherIndividual):
+        """
+        Alteração dos cromossomos para trazer diversidade nas gerações
+        Sorteia um gene no cromossomo e realiza a troca, respeitando o critério de não conter genes duplicados.
+        """
         genes_1 = self.chromosome
         genes_2 = otherIndividual.chromosome
         selected_gene = randint(0, len(genes_1) - 1)
@@ -95,20 +95,18 @@ class Individuals():
 
         return childs
 
-    """
-    Realiza combinação dos genes de um cromossomo
-    """
-
     def exchange_gene(self, gene, genes_1, genes_2):
+        """
+        Realiza combinação dos genes de um cromossomo
+        """
         tmp = genes_1[gene]
         genes_1[gene] = genes_2[gene]
         genes_2[gene] = tmp
 
-    """
-    Busca genes duplicados em um cromossomo
-    """
-
     def get_duplicated_gene(self, genes, exchanged_genes):
+        """
+        Busca genes duplicados em um cromossomo
+        """
         for gene in range(len(genes)):
             if gene in exchanged_genes:
                 continue
@@ -126,12 +124,12 @@ class Individuals():
         """
         # sorteia um intervalo de 1% a 100%
         if randint(1, 100) <= mutationRate:
-            print("Realizando mutação no cromossomo %s" % self.chromosome)
+            # print("Realizando mutação no cromossomo %s" % self.chromosome)
             genes = self.chromosome
             gene_1 = randint(1, len(genes) - 1) # iniciando range em 1 pois o primeiro ponto sempre dever ser o do DeliveryMan
             gene_2 = randint(1, len(genes) - 1) #
             tmp = genes[gene_1]
             genes[gene_1] = genes[gene_2]
             genes[gene_2] = tmp
-            print("Valor após mutação: %s" % self.chromosome)
+            # print("Valor após mutação: %s" % self.chromosome)
         return self
