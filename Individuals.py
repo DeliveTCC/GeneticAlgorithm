@@ -1,5 +1,7 @@
 from random import randint
+
 from City import Distance
+
 
 class Individuals():
     def __init__(self, time_distances, cities, generation=0, init_chromosome=True):
