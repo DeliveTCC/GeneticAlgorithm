@@ -152,7 +152,7 @@ def run(event=None, test=False):
     if test:
         event = {
             'populationSize':20,
-            "mutationRate":0,
+            "mutationRate":1,
             "min_generations":1000,
             'matrix':{"a":["deliveryMan", "b", [None, 1, None, None, None]],
                       "b":["collect", "d", [1, None, 2, 4, 5]],
