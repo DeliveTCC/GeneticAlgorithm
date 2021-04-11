@@ -140,24 +140,25 @@ def run(event=None, test=False):
     event = {
         'populationSize':20,
         "mutationRate":1,
-        "min_generations":2,
-        'cities':{"a":["orig", "c", [0, 1, 2, 5]],
-                  "b":["orig", "d", [1, 0, 4, 5]],
-                  "c":["dest", "a", [2, 4, 0, 6]],
-                  "d":["dest", "b", [5, 5, 6, 0]],
-                },
+        "min_generations":1000,
+        'matrix':{"a":["deliveryMan", "b", [None, 1, None, None, None]],
+                       "b":["collect", "d", [1, None, 2, 4, 5]],
+                       "c":["collect", "e", [3, 2, None, 5, 6]],
+                       "d":["delivery", "b", [7, 4, 5, None, 6]],
+                       "e":["delivery", "c", [9, 5, 6, 6, None]],
+                    },
     }
     """
     if test:
         event = {
             'populationSize':20,
-            "mutationRate":1,
+            "mutationRate":0,
             "min_generations":1000,
             'matrix':{"a":["deliveryMan", "b", [None, 1, None, None, None]],
-                      "b":["collect", "c", [1, None, 2, 4, 5]],
-                      "c":["collect", "d", [3, 2, None, 5, 6]],
-                      "d":["delivery", "a", [7, 4, 3, None, 6]],
-                      "e":["delivery", "b", [9, 5, 5, 6, None]],
+                      "b":["collect", "d", [1, None, 2, 4, 5]],
+                      "c":["collect", "e", [3, 2, None, 5, 6]],
+                      "d":["delivery", "b", [7, 4, 5, None, 6]],
+                      "e":["delivery", "c", [9, 5, 6, 6, None]],
                     },
         }
     
