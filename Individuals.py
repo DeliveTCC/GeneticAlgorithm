@@ -41,14 +41,20 @@ class Individuals():
                         break
                 break
 
+        # if ((cities_copy[city].trip_type == "delivery") & (cities_copy[city].detail in names_aux)
+        #         | (cities_copy[city].trip_type == "collect")):
+        #   names_aux.append(cities_copy[city].name)
+
         while len(cities_copy) > 0:
-            city = randint(0, len(cities_copy) - 1)
             
-            if ((cities_copy[city].trip_type == "delivery") & (cities_copy[city].detail in names_aux)
-                | (cities_copy[city].trip_type == "collect")):
-                
-                names_aux.append(cities_copy[city].name)
-                self.chromosome.append(cities_copy.pop(city)._index)
+            x = randint(0, len(cities_copy) - 1)
+            gene = cities_copy[x]._index
+            self.chromosome.append(gene)            
+            
+            if self.chromossome_validate(chromosome=self.chromosome):
+                cities_copy.pop(x)
+            else:
+                self.chromosome.pop(-1)
 
     # Avaliação de aptidão
     def fitness(self):
@@ -72,7 +78,8 @@ class Individuals():
     def crossover(self, otherIndividual):
         """
         Alteração dos cromossomos para trazer diversidade nas gerações
-        Sorteia um gene no cromossomo e realiza a troca, respeitando o critério de não conter genes duplicados.
+        Sorteia um gene no cromossomo e realiza a troca, respeitando o critério de não conter genes duplicados,
+        e de ser um cromossomo válido.
         """
         genes_1 = self.chromosome
         genes_2 = otherIndividual.chromosome
@@ -135,3 +142,26 @@ class Individuals():
             genes[gene_2] = tmp
             # print("Valor após mutação: %s" % self.chromosome)
         return self
+
+    def chromossome_validate(self, chromosome=[]):
+        """
+        Valida se o chromossome é válido.
+        Caso haja uma entrega antes de uma coleta, será retornado False,
+        caso contrário, True.
+        """
+        validate = True
+        
+        for i, gene in enumerate(chromosome):
+            
+            city = self.cities[gene]
+            
+            if city.trip_type == "delivery":    
+                
+                previous_chromosome = chromosome[:i]
+                previous_cities = [self.cities[g].name for g in previous_chromosome] # apenas os pontos anteriores ao da entrega
+                
+                if city.detail not in previous_cities:
+                    validate = False
+                    break
+
+        return validate
