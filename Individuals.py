@@ -51,7 +51,7 @@ class Individuals():
             gene = cities_copy[x]._index
             self.chromosome.append(gene)            
             
-            if self.chromossome_validate(chromosome=self.chromosome):
+            if self.chromosome_validate(chromosome=self.chromosome):
                 cities_copy.pop(x)
             else:
                 self.chromosome.pop(-1)
@@ -81,9 +81,10 @@ class Individuals():
         Sorteia um gene no cromossomo e realiza a troca, respeitando o critério de não conter genes duplicados,
         e de ser um cromossomo válido.
         """
-        genes_1 = self.chromosome
-        genes_2 = otherIndividual.chromosome
-        selected_gene = randint(0, len(genes_1) - 1)
+        genes_1 = self.chromosome #[0, 1, 2, 4, 3]
+        genes_2 = otherIndividual.chromosome #[0, 1, 2, 3, 4]
+        
+        selected_gene = randint(0, len(genes_1) - 1) 
         self.exchange_gene(selected_gene, genes_1, genes_2)
         exchanged_genes = []
         exchanged_genes.append(selected_gene)
@@ -93,6 +94,9 @@ class Individuals():
                 break
             self.exchange_gene(duplicated_gene, genes_1, genes_2)
             exchanged_genes.append(duplicated_gene)
+
+        if (genes_1 != self.chromosome) | (genes_2 != otherIndividual.chromosome):
+            print(genes_1 != self.chromosome, genes_2 != otherIndividual.chromosome)
 
         childs = [
             Individuals(self.time_distances, self.cities, self.generation + 1),
@@ -143,25 +147,34 @@ class Individuals():
             # print("Valor após mutação: %s" % self.chromosome)
         return self
 
-    def chromossome_validate(self, chromosome=[]):
+    def check_chromosome(self, chromosome=[]):
         """
-        Valida se o chromossome é válido.
-        Caso haja uma entrega antes de uma coleta, será retornado False,
-        caso contrário, True.
+        Verifica se o cromossomo é válido.
         """
-        validate = True
-        
-        for i, gene in enumerate(chromosome):
-            
+        return (
+            self.check_duplicates(chromosome)
+            & self.check_requirements(chromosome)
+        )
+
+    def check_duplicates(self, chromosome=[]):
+        """
+        Verifica se existe genes duplicados no cromossomo
+        """
+        return len(chromosome) == len(set(chromosome))
+
+    def check_requirements(self, chromosome=[]):
+        """
+        Verifica se existe uma entrega antes de uma coleta
+        """
+        ok = True
+        for i, gene in enumerate(chromosome):            
             city = self.cities[gene]
             
             if city.trip_type == "delivery":    
-                
                 previous_chromosome = chromosome[:i]
                 previous_cities = [self.cities[g].name for g in previous_chromosome] # apenas os pontos anteriores ao da entrega
                 
                 if city.detail not in previous_cities:
-                    validate = False
+                    ok = False
                     break
-
-        return validate
+        return ok
