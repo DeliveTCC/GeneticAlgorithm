@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, sample
 
 from City import Distance
 
@@ -51,7 +51,7 @@ class Individuals():
             gene = cities_copy[x]._index
             self.chromosome.append(gene)            
             
-            if self.chromosome_validate(chromosome=self.chromosome):
+            if self.check_chromosome(chromosome=self.chromosome):
                 cities_copy.pop(x)
             else:
                 self.chromosome.pop(-1)
@@ -61,16 +61,16 @@ class Individuals():
         sum_distance = 0
         current_city = self.chromosome[0]  # cidade de partida do cromossomo
 
-        for i in range(len(self.chromosome)):
+        for dest_city in self.chromosome:
             d = Distance(self.cities)
-            dest_city = self.chromosome[i]  # cidade atual no grafo
+            # dest_city = self.chromosome[i]  # cidade atual no grafo
             distance = d.get_distance(current_city, dest_city)
             sum_distance += distance
             self.visited_cities.append(dest_city)  # adiciona cromossomo como cidade visitada
             current_city = dest_city
 
             # soma distância da última cidade para a primeira - caminho de volta
-            if i == len(self.chromosome) - 1:
+            if dest_city == self.chromosome[-1]:
                 sum_distance += d.get_distance(self.chromosome[len(self.chromosome) - 1], self.chromosome[0])
 
         self.travelled_distance = sum_distance
@@ -81,40 +81,95 @@ class Individuals():
         Sorteia um gene no cromossomo e realiza a troca, respeitando o critério de não conter genes duplicados,
         e de ser um cromossomo válido.
         """
-        genes_1 = self.chromosome #[0, 1, 2, 4, 3]
-        genes_2 = otherIndividual.chromosome #[0, 1, 2, 3, 4]
-        
-        selected_gene = randint(0, len(genes_1) - 1) 
-        self.exchange_gene(selected_gene, genes_1, genes_2)
-        exchanged_genes = []
-        exchanged_genes.append(selected_gene)
-        while True:
-            duplicated_gene = self.get_duplicated_gene(genes_1, exchanged_genes)
-            if (duplicated_gene == -1):
-                break
-            self.exchange_gene(duplicated_gene, genes_1, genes_2)
-            exchanged_genes.append(duplicated_gene)
-
-        if (genes_1 != self.chromosome) | (genes_2 != otherIndividual.chromosome):
-            print(genes_1 != self.chromosome, genes_2 != otherIndividual.chromosome)
+        print("crossover ...")
+        chromosome_1 = self.chromosome.copy()
+        chromosome_2 = otherIndividual.chromosome.copy()
+        children_chromosomes = tuple()
+       
+        if chromosome_1 == chromosome_2:
+            children_chromosomes = (chromosome_1, chromosome_2)
+        else:
+            while True:
+                children_chromosomes = self.pmx(chromosome_1, chromosome_2)
+                if self.check_chromosome(children_chromosomes[0]) & self.check_chromosome(children_chromosomes[1]): # se forma um cromossomo válido
+                    break
 
         childs = [
             Individuals(self.time_distances, self.cities, self.generation + 1),
             Individuals(self.time_distances, self.cities, self.generation + 1)
         ]
 
-        childs[0].chromosome = genes_1
-        childs[1].chromosome = genes_2
+        childs[0].chromosome = children_chromosomes[0]
+        childs[1].chromosome = children_chromosomes[1]
 
         return childs
 
-    def exchange_gene(self, gene, genes_1, genes_2):
+    def pmx(self, chromosome_1:list(), chromosome_2:list()):
         """
-        Realiza combinação dos genes de um cromossomo
+        Realiza combinação dos genes entre dois cromossomos
+        Método: PMX (Partially Mapped Crossover)
+        Fontes: 
+            1. Artigo:
+                Genetic Algorithm for Traveling Salesman Problem with Modified Cycle Crossover Operator (2017)
+                Capítulo 2.1.1
+                https://doi.org/10.1155/2017/7430125 (Acesso em 14/04/2021)
+
+            2. Palestra:
+                [PyBR14] Algoritmo Genético com Python - Ana Paula Mendes
+                https://youtu.be/PCa0koOOQnM?t=814 (Acesso em 14/04/2021)
+
+        Args:
+            chromosome_1 (list): lista de inteiros que será combinado com a lista chromosome_2
+            chromosome_2 (list): lista de inteiros que será combinado com a lista chromosome_1
+
+        Returns:
+            chromosome_result (tuple): tuple com as duas listas de cromossomos resultantes
         """
-        tmp = genes_1[gene]
-        genes_1[gene] = genes_2[gene]
-        genes_2[gene] = tmp
+
+        p1=0
+        p2=0
+        while p1>=p2:
+            p1, p2 = sample(range(2, len(chromosome_1)), 2)
+        # p1 = randint(2, len(chromosome_1)-2)
+        # p2 = p1+2
+            
+        section_1 = chromosome_1[p1:p2]
+        section_2 = chromosome_2[p1:p2]
+
+        # reservando posições para o cruzamento
+        for i in range(p1, p2):
+            chromosome_1[i] = 'reserved'
+            chromosome_2[i] = 'reserved'
+
+        # Removendo genes que ficariam duplicados após o cruzamento
+        # Para cada gene de section_2 que já exista no cromossomo
+        # É substituido por um gene de section_1 que não exista em section_2
+        replaced = []
+        for s2 in section_2:
+            if s2 in chromosome_1: 
+                index = chromosome_1.index(s2)
+                for s1 in section_1:
+                    if (s1 not in section_2) & (s1 not in replaced):
+                        chromosome_1[index] = s1
+                        replaced.append(s1)
+                        break
+
+        replaced = []
+        for s1 in section_1:
+            if s1 in chromosome_2:
+                index = chromosome_2.index(s1)
+                for s2 in section_2:
+                    if (s2 not in section_1) & (s2 not in replaced):
+                        chromosome_2[index] = s2
+                        replaced.append(s2)
+                        break
+                
+        chromosome_1[p1:p2] = section_2
+        chromosome_2[p1:p2] = section_1
+
+        return (chromosome_1, chromosome_2)
+
+    
 
     def get_duplicated_gene(self, genes, exchanged_genes):
         """
@@ -135,22 +190,32 @@ class Individuals():
         Sorteia um intervalo de 1% a 100%, se corresponder a taxa de mutação altera os genes
         Respeita o critério de não existir genes duplicados
         """
-        # sorteia um intervalo de 1% a 100%
-        if randint(1, 100) <= mutationRate:
-            # print("Realizando mutação no cromossomo %s" % self.chromosome)
-            genes = self.chromosome
-            gene_1 = randint(1, len(genes) - 1) # iniciando range em 1 pois o primeiro ponto sempre dever ser o do DeliveryMan
-            gene_2 = randint(1, len(genes) - 1) #
-            tmp = genes[gene_1]
-            genes[gene_1] = genes[gene_2]
-            genes[gene_2] = tmp
-            # print("Valor após mutação: %s" % self.chromosome)
+        # print("mutation ...")
+        while True:
+            # sorteia um intervalo de 1% a 100%
+            if randint(1, 100) <= mutationRate:
+                print("Realizando mutação no cromossomo %s" % self.chromosome)
+                genes = self.chromosome
+                gene_1 = randint(1, len(genes) - 1) # iniciando range em 1 pois o primeiro ponto sempre dever ser o do DeliveryMan
+                gene_2 = randint(1, len(genes) - 1) #
+                tmp = genes[gene_1]
+                genes[gene_1] = genes[gene_2]
+                genes[gene_2] = tmp
+                print("Valor após mutação: %s" % self.chromosome)
+
+            if self.check_chromosome(self.chromosome):
+                break
+
         return self
 
     def check_chromosome(self, chromosome=[]):
         """
         Verifica se o cromossomo é válido.
         """
+        # print("check_duplicates:", self.check_duplicates(chromosome))
+        # if (self.check_duplicates(chromosome) & self.check_requirements(chromosome)):
+        #     print("check_requirements:", self.check_requirements(chromosome))
+
         return (
             self.check_duplicates(chromosome)
             & self.check_requirements(chromosome)

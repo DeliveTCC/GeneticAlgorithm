@@ -90,7 +90,7 @@ class GeneticAlgorithm():
             sum_travelled_distance = self.sum_travelled_distance()
             newPopulation = []
             # print("\n")
-            # print(generation)
+            print(generation)
 
             for i in range(0, self.populationSize, 2):
                 # seleciona dois indivíduos para reprodução - cai na roleta
@@ -109,7 +109,7 @@ class GeneticAlgorithm():
             for individual in self.population:
                 individual.fitness()
                 # Uncomment do debug
-                # print(f"Generation: {generation} New population: {individual.chromosome} - Travelled Distance: {individual.travelled_distance}")
+                print(f"Generation: {generation} New population: {individual.chromosome} - Travelled Distance: {individual.travelled_distance}")
                 # print(f"Generation: {generation} - Travelled Distance: {individual.travelled_distance}")
             
             # print(f"Last individual: {individual.chromosome}")
@@ -127,6 +127,8 @@ class GeneticAlgorithm():
             self.best_solution.travelled_distance,
             self.best_solution.visited_cities
         ))
+
+        print("check_chromosome:", self.best_solution.check_chromosome(self.best_solution.chromosome))
 
         return [
             self.best_solution.generation,
