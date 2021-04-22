@@ -14,7 +14,7 @@ class GeneticAlgorithm():
     # time_distances será um array 2D
     # cities será [City("A", [0, 10]), City("B", [10, 0])]
     def init_population(self, time_distances, cities):
-        for i in range(self.populationSize):
+        for _ in range(self.populationSize):
             self.population.append(Individuals(time_distances, cities))
 
         self.best_solution = self.population[0]
@@ -92,7 +92,7 @@ class GeneticAlgorithm():
             # print("\n")
             print(generation)
 
-            for i in range(0, self.populationSize, 2):
+            for _ in range(0, self.populationSize, 2):
                 # seleciona dois indivíduos para reprodução - cai na roleta
                 parent1 = self.select_parents(sum_travelled_distance)
                 parent2 = self.select_parents(sum_travelled_distance)
