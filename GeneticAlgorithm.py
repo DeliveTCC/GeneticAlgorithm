@@ -3,7 +3,8 @@ from Individuals import Individuals
 from random import choices
 import numpy as np
 
-class GeneticAlgorithm():
+
+class GeneticAlgorithm:
     def __init__(self, population_size=20, cities=[]):
         self.populationSize = population_size
         self.population = []
@@ -21,20 +22,21 @@ class GeneticAlgorithm():
 
     # orderna a população pelo atributo travelled_distance ascendentemente
     def sort_population(self):
-        self.population = sorted(self.population,
-                                 key=lambda population: population.travelled_distance,
-                                 reverse=False)
+        self.population = sorted(
+            self.population,
+            key=lambda population: population.travelled_distance,
+            reverse=False,
+        )
 
     # caso encontre um indivíduo com menor distância o marcamos como melhor solução
     def best_individual(self, individual):
         if individual.travelled_distance < self.best_solution.travelled_distance:
             self.best_solution = individual
 
-    """
-    Soma distância percorrida por cada indivíduo da população
-    """
-
     def sum_travelled_distance(self):
+        """
+        Soma distância percorrida por cada indivíduo da população
+        """
         sum = 0
         for individual in self.population:
             sum += individual.travelled_distance
@@ -59,12 +61,17 @@ class GeneticAlgorithm():
             if distance != np.inf:
                 total_travelled_distance += distance
 
-        weights = [(1-(p.travelled_distance/total_travelled_distance)) if p.travelled_distance!=np.inf else 0 for p in self.population]
+        weights = [
+            (1 - (p.travelled_distance / total_travelled_distance))
+            if p.travelled_distance != np.inf
+            else 0
+            for p in self.population
+        ]
         if np.sum(weights) == 0:
             weights = None
-        
+
         parent = choices(range(len(self.population)), weights, k=1)
-        
+
         return parent[0]
 
     def resolve(self, mutationRate, min_generations, time_distances, cities):
@@ -76,7 +83,7 @@ class GeneticAlgorithm():
 
         # Critério de parada inicialmente era o número de gerações.
         # Porém alguns casos ficou difícil determinar o número de gerações.
-    	# Foi então adicionado mais uma regra onde, caso o número mínimo de gerações não seja suficiente
+        # Foi então adicionado mais uma regra onde, caso o número mínimo de gerações não seja suficiente
         # O algorítimo continuará a ser executado até que se encontre um uma rota cujo Travelled Distance != Infinito
         # Sendo Infifinto a distância de uma rota que não atende à requisitos mínimos como por exemplo,
         # passar pelo destino da entrega antes da origem,
@@ -84,12 +91,11 @@ class GeneticAlgorithm():
         # for generation in range(min_generations):
         generation = 0
         while generation < min_generations:
-            if (generation == (min_generations-1)) & (self.best_solution.travelled_distance == np.inf):
+            if (generation == (min_generations - 1)) & (self.best_solution.travelled_distance == np.inf):
                 min_generations += 1
-                
+
             sum_travelled_distance = self.sum_travelled_distance()
             newPopulation = []
-            # print("\n")
             print(generation)
 
             for _ in range(0, self.populationSize, 2):
@@ -111,7 +117,7 @@ class GeneticAlgorithm():
                 # Uncomment do debug
                 # print(f"Generation: {generation} New population: {individual.chromosome} - Travelled Distance: {individual.travelled_distance}")
                 # print(f"Generation: {generation} - Travelled Distance: {individual.travelled_distance}")
-            
+
             # print(f"Last individual: {individual.chromosome}")
 
             # ordena população para melhor solução estar na primeira posição
@@ -119,22 +125,29 @@ class GeneticAlgorithm():
 
             best = self.population[0]
             self.best_individual(best)
-            
+
             generation += 1
 
-        print("Melhor solução -> G: %s - Distância percorrida: %s - Cromossomo: %s" % (
-            self.best_solution.generation,
-            self.best_solution.travelled_distance,
-            self.best_solution.visited_cities
-        ))
+        print(
+            "Melhor solução -> G: %s - Distância percorrida: %s - Cromossomo: %s"
+            % (
+                self.best_solution.generation,
+                self.best_solution.travelled_distance,
+                self.best_solution.visited_cities,
+            )
+        )
 
-        print("check_chromosome:", self.best_solution.check_chromosome(self.best_solution.chromosome))
+        print(
+            "check_chromosome:",
+            self.best_solution.check_chromosome(self.best_solution.chromosome),
+        )
 
         return [
             self.best_solution.generation,
             self.best_solution.travelled_distance,
-            self.best_solution.visited_cities
+            self.best_solution.visited_cities,
         ]
+
 
 def run(event=None, test=False):
     """
@@ -153,22 +166,23 @@ def run(event=None, test=False):
     """
     if test:
         event = {
-            'populationSize':20,
-            "mutationRate":1,
-            "min_generations":1000,
-            'matrix':{"a":["deliveryMan", "b", [None, 1, None, None, None]],
-                      "b":["collect", "d", [1, None, 2, 4, 5]],
-                      "c":["collect", "e", [3, 2, None, 5, 6]],
-                      "d":["delivery", "b", [7, 4, 5, None, 6]],
-                      "e":["delivery", "c", [9, 5, 6, 6, None]],
-                    },
+            "populationSize": 20,
+            "mutationRate": 1,
+            "min_generations": 1000,
+            "matrix": {
+                "a": ["deliveryMan", "b", [None, 1, None, None, None]],
+                "b": ["collect", "d", [1, None, 2, 4, 5]],
+                "c": ["collect", "e", [3, 2, None, 5, 6]],
+                "d": ["delivery", "b", [7, 4, 5, None, 6]],
+                "e": ["delivery", "c", [9, 5, 6, 6, None]],
+            },
         }
-    
+
     if event:
-        population_size = int(event['populationSize'])
+        population_size = int(event["populationSize"])
         mutation_rate = int(event["mutationRate"])
         min_generations = int(event["min_generations"])
-        body_cities = event['matrix']
+        body_cities = event["matrix"]
 
     try:
         c = Cities()
@@ -178,27 +192,21 @@ def run(event=None, test=False):
         cities_list = c.get_cities()
 
         time_distances = [city.distances for city in cities_list]
-        # for city in cities_list:
-            # print("Distâncias da cidade: %s\n******" % city.name)
-            # time_distances.append(city.distances)
-            # print(city.distances)
-            # for index, distance in enumerate(city.distances):
-                # print("De %s --> %s = %s" % (city.name, cities_list[index].name, distance))
 
         ga = GeneticAlgorithm(population_size)
         result = ga.resolve(mutation_rate, min_generations, time_distances, cities_list)
 
         to_return = {
-            'generation': result[0],
-            'travelled_distance': result[1],
-            'chromosome': result[2],
-            'cities': c.chromose_to_cities(result[2])
+            "generation": result[0],
+            "travelled_distance": result[1],
+            "chromosome": result[2],
+            "cities": c.chromose_to_cities(result[2]),
         }
-        # print(to_return)
         return to_return
 
     except ImportError:
         print(ImportError)
+
 
 if __name__ == "__main__":
     run(test=True)

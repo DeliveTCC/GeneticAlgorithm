@@ -1,6 +1,7 @@
 import numpy as np
 
-class City():
+
+class City:
     def __init__(self, name, trip_type, detail, distances):
         self.name = name
         self.trip_type = trip_type
@@ -15,7 +16,7 @@ class City():
         return self.distances
 
 
-class Cities():
+class Cities:
     def __init__(self, cities=[]):
         self.cities = cities
 
@@ -42,6 +43,7 @@ class Cities():
 
     def get_total_cities(self):
         return len(self.cities)
+
 
 class Distance:
     def __init__(self, cities):
