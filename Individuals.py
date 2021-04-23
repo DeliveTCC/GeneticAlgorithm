@@ -4,7 +4,7 @@ import numpy as np
 from City import Distance
 
 
-class Individuals():
+class Individuals:
     def __init__(self, time_distances, cities, generation=0, init_chromosome=True):
         self.time_distances = time_distances  # 2D array [[], []]
         self.cities = cities  # City list [City(), City()]
@@ -21,15 +21,15 @@ class Individuals():
         cities_copy = self.cities.copy()
         for i in range(len(cities_copy)):
             cities_copy[i]._index = i
-        
+
         names_aux = []
 
         # Adicionando ponto de partida que é a localição do DeliveryMan
         for i in range(len(cities_copy)):
             if cities_copy[i].trip_type == "deliveryMan":
-                
+
                 names_aux.append(cities_copy[i].name)
-                
+
                 collect_point = cities_copy[i].detail
                 names_aux.append(collect_point)
 
@@ -42,16 +42,12 @@ class Individuals():
                         break
                 break
 
-        # if ((cities_copy[city].trip_type == "delivery") & (cities_copy[city].detail in names_aux)
-        #         | (cities_copy[city].trip_type == "collect")):
-        #   names_aux.append(cities_copy[city].name)
-
         while len(cities_copy) > 0:
-            
+
             x = randint(0, len(cities_copy) - 1)
             gene = cities_copy[x]._index
-            self.chromosome.append(gene)            
-            
+            self.chromosome.append(gene)
+
             if self.check_chromosome(chromosome=self.chromosome):
                 cities_copy.pop(x)
             else:
@@ -60,19 +56,20 @@ class Individuals():
     # Avaliação de aptidão
     def fitness(self):
         sum_distance = 0
-        current_city = self.chromosome[0]  # cidade de partida do cromossomo
+        current_city = self.chromosome[0]
 
         for dest_city in self.chromosome:
             d = Distance(self.cities)
-            # dest_city = self.chromosome[i]  # cidade atual no grafo
             distance = d.get_distance(current_city, dest_city)
             sum_distance += distance
-            self.visited_cities.append(dest_city)  # adiciona cromossomo como cidade visitada
+            self.visited_cities.append(dest_city)
             current_city = dest_city
 
             # soma distância da última cidade para a primeira - caminho de volta
             if dest_city == self.chromosome[-1]:
-                sum_distance += d.get_distance(self.chromosome[len(self.chromosome) - 1], self.chromosome[0])
+                sum_distance += d.get_distance(
+                    self.chromosome[len(self.chromosome) - 1], self.chromosome[0]
+                )
 
         self.travelled_distance = sum_distance
 
@@ -82,7 +79,6 @@ class Individuals():
         Sorteia um gene no cromossomo e realiza a troca, respeitando o critério de não conter genes duplicados,
         e de ser um cromossomo válido.
         """
-        # print("crossover ...")
         chromosome_1 = self.chromosome.copy()
         chromosome_2 = otherIndividual.chromosome.copy()
         children_chromosomes = tuple()
@@ -92,17 +88,21 @@ class Individuals():
         else:
             _break = 0
             while True:
-                children_chromosomes = self.pmx(chromosome_1.copy(), chromosome_2.copy())
-                if self.check_chromosome(children_chromosomes[0]) & self.check_chromosome(children_chromosomes[1]): # se forma um cromossomo válido
+                children_chromosomes = self.pmx(
+                    chromosome_1.copy(), chromosome_2.copy()
+                )
+                # para ao formar um cromossomo válido
+                if self.check_chromosome(children_chromosomes[0]) & self.check_chromosome(children_chromosomes[1]):
                     break
-                elif _break == 100: # ou 100 tentativas sem sucesso
+                # ou após 100 tentativas sem sucesso para evitar loops infinitos
+                elif _break == 100:
                     children_chromosomes = (chromosome_1, chromosome_2)
                     break
                 _break += 1
 
         childs = [
             Individuals(self.time_distances, self.cities, self.generation + 1),
-            Individuals(self.time_distances, self.cities, self.generation + 1)
+            Individuals(self.time_distances, self.cities, self.generation + 1),
         ]
 
         childs[0].chromosome = children_chromosomes[0]
@@ -110,11 +110,11 @@ class Individuals():
 
         return childs
 
-    def pmx(self, chromosome_1:list(), chromosome_2:list()):
+    def pmx(self, chromosome_1: list(), chromosome_2: list()):
         """
         Realiza combinação dos genes entre dois cromossomos
         Método: PMX (Partially Mapped Crossover)
-        Fontes: 
+        Fontes:
             1. Artigo:
                 Genetic Algorithm for Traveling Salesman Problem with Modified Cycle Crossover Operator (2017)
                 Capítulo 2.1.1
@@ -131,28 +131,23 @@ class Individuals():
         Returns:
             chromosome_result (tuple): tuple com as duas listas de cromossomos resultantes
         """
+        p1 = randint(2, len(chromosome_1) - 1)
+        p2 = p1 + 1
 
-        p1=0
-        p2=0
-        # while p1>=p2:
-        #     p1, p2 = sample(range(2, len(chromosome_1)), 2)
-        p1 = randint(2, len(chromosome_1)-1) # sortear da metade do cromossomo pra trás, pos a chance de pegar uma coleta é maior que uma entrega
-        p2 = p1+1
-            
         section_1 = chromosome_1[p1:p2]
         section_2 = chromosome_2[p1:p2]
 
         # reservando posições para o cruzamento
         for i in range(p1, p2):
-            chromosome_1[i] = 'reserved'
-            chromosome_2[i] = 'reserved'
+            chromosome_1[i] = "reserved"
+            chromosome_2[i] = "reserved"
 
         # Removendo genes que ficariam duplicados após o cruzamento
         # Para cada gene de section_2 que já exista no cromossomo
         # É substituido por um gene de section_1 que não exista em section_2
         replaced = []
         for s2 in section_2:
-            if s2 in chromosome_1: 
+            if s2 in chromosome_1:
                 index = chromosome_1.index(s2)
                 for s1 in section_1:
                     if (s1 not in section_2) & (s1 not in replaced):
@@ -169,13 +164,11 @@ class Individuals():
                         chromosome_2[index] = s2
                         replaced.append(s2)
                         break
-                
+
         chromosome_1[p1:p2] = section_2
         chromosome_2[p1:p2] = section_1
 
         return (chromosome_1, chromosome_2)
-
-    
 
     def get_duplicated_gene(self, genes, exchanged_genes):
         """
@@ -196,18 +189,18 @@ class Individuals():
         Sorteia um intervalo de 1% a 100%, se corresponder a taxa de mutação altera os genes
         Respeita o critério de não existir genes duplicados
         """
-        # print("mutation ...")
         while True:
             # sorteia um intervalo de 1% a 100%
             if randint(1, 100) <= mutationRate:
-                # print("Realizando mutação no cromossomo %s" % self.chromosome)
+                print("Realizando mutação no cromossomo %s" % self.chromosome)
                 genes = self.chromosome.copy()
-                gene_1 = randint(2, len(genes) - 1) # iniciando range em 2, 0 é entregador e 1 a coleta mais próxima
+                # iniciando range em 2, 0 é entregador e 1 a coleta mais próxima
+                gene_1 = randint(2, len(genes) - 1)
                 gene_2 = randint(2, len(genes) - 1)
                 tmp = genes[gene_1]
                 genes[gene_1] = genes[gene_2]
                 genes[gene_2] = tmp
-                # print("Valor após mutação: %s" % self.chromosome)
+                print("Valor após mutação: %s" % self.chromosome)
 
                 if self.check_chromosome(genes):
                     self.chromosome = genes
@@ -219,14 +212,7 @@ class Individuals():
         """
         Verifica se o cromossomo é válido.
         """
-        # print("check_duplicates:", self.check_duplicates(chromosome))
-        # if (self.check_duplicates(chromosome) & self.check_requirements(chromosome)):
-        #     print("check_requirements:", self.check_requirements(chromosome))
-
-        return (
-            self.check_duplicates(chromosome)
-            & self.check_requirements(chromosome)
-        )
+        return self.check_duplicates(chromosome) & self.check_requirements(chromosome)
 
     def check_duplicates(self, chromosome=[]):
         """
@@ -239,13 +225,14 @@ class Individuals():
         Verifica se existe uma entrega antes de uma coleta
         """
         ok = True
-        for i, gene in enumerate(chromosome):            
+        for i, gene in enumerate(chromosome):
             city = self.cities[gene]
-            
-            if city.trip_type == "delivery":    
+
+            if city.trip_type == "delivery":
                 previous_chromosome = chromosome[:i]
-                previous_cities = [self.cities[g].name for g in previous_chromosome] # apenas os pontos anteriores ao da entrega
-                
+                # apenas os pontos anteriores ao da entrega
+                previous_cities = [self.cities[g].name for g in previous_chromosome]
+
                 if city.detail not in previous_cities:
                     ok = False
                     break
