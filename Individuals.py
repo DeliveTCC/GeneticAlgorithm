@@ -1,4 +1,5 @@
 from random import randint, sample
+import numpy as np
 
 from City import Distance
 
@@ -81,18 +82,23 @@ class Individuals():
         Sorteia um gene no cromossomo e realiza a troca, respeitando o critério de não conter genes duplicados,
         e de ser um cromossomo válido.
         """
-        print("crossover ...")
+        # print("crossover ...")
         chromosome_1 = self.chromosome.copy()
         chromosome_2 = otherIndividual.chromosome.copy()
         children_chromosomes = tuple()
-       
+
         if chromosome_1 == chromosome_2:
             children_chromosomes = (chromosome_1, chromosome_2)
         else:
+            _break = 0
             while True:
-                children_chromosomes = self.pmx(chromosome_1, chromosome_2)
+                children_chromosomes = self.pmx(chromosome_1.copy(), chromosome_2.copy())
                 if self.check_chromosome(children_chromosomes[0]) & self.check_chromosome(children_chromosomes[1]): # se forma um cromossomo válido
                     break
+                elif _break == 100: # ou 100 tentativas sem sucesso
+                    children_chromosomes = (chromosome_1, chromosome_2)
+                    break
+                _break += 1
 
         childs = [
             Individuals(self.time_distances, self.cities, self.generation + 1),
@@ -128,10 +134,10 @@ class Individuals():
 
         p1=0
         p2=0
-        while p1>=p2:
-            p1, p2 = sample(range(2, len(chromosome_1)), 2)
-        # p1 = randint(2, len(chromosome_1)-2)
-        # p2 = p1+2
+        # while p1>=p2:
+        #     p1, p2 = sample(range(2, len(chromosome_1)), 2)
+        p1 = randint(2, len(chromosome_1)-1) # sortear da metade do cromossomo pra trás, pos a chance de pegar uma coleta é maior que uma entrega
+        p2 = p1+1
             
         section_1 = chromosome_1[p1:p2]
         section_2 = chromosome_2[p1:p2]
@@ -194,17 +200,18 @@ class Individuals():
         while True:
             # sorteia um intervalo de 1% a 100%
             if randint(1, 100) <= mutationRate:
-                print("Realizando mutação no cromossomo %s" % self.chromosome)
-                genes = self.chromosome
-                gene_1 = randint(1, len(genes) - 1) # iniciando range em 1 pois o primeiro ponto sempre dever ser o do DeliveryMan
-                gene_2 = randint(1, len(genes) - 1) #
+                # print("Realizando mutação no cromossomo %s" % self.chromosome)
+                genes = self.chromosome.copy()
+                gene_1 = randint(2, len(genes) - 1) # iniciando range em 2, 0 é entregador e 1 a coleta mais próxima
+                gene_2 = randint(2, len(genes) - 1)
                 tmp = genes[gene_1]
                 genes[gene_1] = genes[gene_2]
                 genes[gene_2] = tmp
-                print("Valor após mutação: %s" % self.chromosome)
+                # print("Valor após mutação: %s" % self.chromosome)
 
-            if self.check_chromosome(self.chromosome):
-                break
+                if self.check_chromosome(genes):
+                    self.chromosome = genes
+                    break
 
         return self
 

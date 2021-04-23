@@ -109,7 +109,7 @@ class GeneticAlgorithm():
             for individual in self.population:
                 individual.fitness()
                 # Uncomment do debug
-                print(f"Generation: {generation} New population: {individual.chromosome} - Travelled Distance: {individual.travelled_distance}")
+                # print(f"Generation: {generation} New population: {individual.chromosome} - Travelled Distance: {individual.travelled_distance}")
                 # print(f"Generation: {generation} - Travelled Distance: {individual.travelled_distance}")
             
             # print(f"Last individual: {individual.chromosome}")
@@ -177,10 +177,10 @@ def run(event=None, test=False):
 
         cities_list = c.get_cities()
 
-        time_distances = []
-        for city in cities_list:
+        time_distances = [city.distances for city in cities_list]
+        # for city in cities_list:
             # print("Distâncias da cidade: %s\n******" % city.name)
-            time_distances.append(city.distances)
+            # time_distances.append(city.distances)
             # print(city.distances)
             # for index, distance in enumerate(city.distances):
                 # print("De %s --> %s = %s" % (city.name, cities_list[index].name, distance))
