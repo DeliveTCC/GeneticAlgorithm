@@ -192,7 +192,7 @@ class Individuals:
         while True:
             # sorteia um intervalo de 1% a 100%
             if randint(1, 100) <= mutationRate:
-                print("Realizando mutação no cromossomo %s" % self.chromosome)
+                # print("Realizando mutação no cromossomo %s" % self.chromosome)
                 genes = self.chromosome.copy()
                 # iniciando range em 2, 0 é entregador e 1 a coleta mais próxima
                 gene_1 = randint(2, len(genes) - 1)
@@ -200,7 +200,7 @@ class Individuals:
                 tmp = genes[gene_1]
                 genes[gene_1] = genes[gene_2]
                 genes[gene_2] = tmp
-                print("Valor após mutação: %s" % self.chromosome)
+                # print("Valor após mutação: %s" % self.chromosome)
 
                 if self.check_chromosome(genes):
                     self.chromosome = genes

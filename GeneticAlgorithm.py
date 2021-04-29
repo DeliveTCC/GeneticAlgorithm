@@ -96,7 +96,7 @@ class GeneticAlgorithm:
 
             sum_travelled_distance = self.sum_travelled_distance()
             newPopulation = []
-            print(generation)
+            # print(generation)
 
             for _ in range(0, self.populationSize, 2):
                 # seleciona dois indivíduos para reprodução - cai na roleta
