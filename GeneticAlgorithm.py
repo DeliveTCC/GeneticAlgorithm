@@ -206,7 +206,3 @@ def run(event=None, test=False):
 
     except ImportError:
         print(ImportError)
-
-
-if __name__ == "__main__":
-    run(test=True)
