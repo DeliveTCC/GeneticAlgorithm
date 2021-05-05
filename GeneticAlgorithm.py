@@ -3,6 +3,7 @@ from Individuals import Individuals
 from random import choices
 import numpy as np
 
+import sys
 
 class GeneticAlgorithm:
     def __init__(self, population_size=20, cities=[], verbose=False):
@@ -94,6 +95,8 @@ class GeneticAlgorithm:
         while generation < min_generations:
             if (generation == (min_generations - 1)) & (self.best_solution.travelled_distance == np.inf):
                 min_generations += 1
+                print("deu ruim.")
+                sys.exit(0)
 
             sum_travelled_distance = self.sum_travelled_distance()
             newPopulation = []
