@@ -5,7 +5,7 @@ from City import Distance
 
 
 class Individuals:
-    def __init__(self, time_distances, cities, generation=0, init_chromosome=True):
+    def __init__(self, time_distances, cities, generation=0, init_chromosome=True, verbose=False):
         self.time_distances = time_distances  # 2D array [[], []]
         self.cities = cities  # City list [City(), City()]
         self.generation = generation
@@ -14,6 +14,7 @@ class Individuals:
         self.visited_cities = []
         self.travelled_distance = 0
         self.probability = 0
+        self.verbose = verbose
 
         # if init_chromosome:
         # Cria cromossomos (não repete cidades)
@@ -192,7 +193,8 @@ class Individuals:
         while True:
             # sorteia um intervalo de 1% a 100%
             if randint(1, 100) <= mutationRate:
-                # print("Realizando mutação no cromossomo %s" % self.chromosome)
+                # if self.verbose:
+                #     print("Realizando mutação no cromossomo %s" % self.chromosome)
                 genes = self.chromosome.copy()
                 # iniciando range em 2, 0 é entregador e 1 a coleta mais próxima
                 gene_1 = randint(2, len(genes) - 1)
@@ -200,7 +202,8 @@ class Individuals:
                 tmp = genes[gene_1]
                 genes[gene_1] = genes[gene_2]
                 genes[gene_2] = tmp
-                # print("Valor após mutação: %s" % self.chromosome)
+                # if self.verbose:
+                #     print("Valor após mutação: %s" % self.chromosome)
 
                 if self.check_chromosome(genes):
                     self.chromosome = genes

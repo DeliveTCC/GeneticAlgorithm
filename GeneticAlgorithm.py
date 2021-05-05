@@ -5,18 +5,19 @@ import numpy as np
 
 
 class GeneticAlgorithm:
-    def __init__(self, population_size=20, cities=[]):
+    def __init__(self, population_size=20, cities=[], verbose=False):
         self.populationSize = population_size
         self.population = []
         self.generation = 0
         self.best_solution: 0
         self.cities = cities
+        self.verbose = verbose
 
     # time_distances será um array 2D
     # cities será [City("A", [0, 10]), City("B", [10, 0])]
     def init_population(self, time_distances, cities):
         for _ in range(self.populationSize):
-            self.population.append(Individuals(time_distances, cities))
+            self.population.append(Individuals(time_distances, cities, self.verbose))
 
         self.best_solution = self.population[0]
 
@@ -96,7 +97,8 @@ class GeneticAlgorithm:
 
             sum_travelled_distance = self.sum_travelled_distance()
             newPopulation = []
-            # print(generation)
+            if self.verbose:
+                print("generation:", generation)
 
             for _ in range(0, self.populationSize, 2):
                 # seleciona dois indivíduos para reprodução - cai na roleta
@@ -114,8 +116,8 @@ class GeneticAlgorithm:
 
             for individual in self.population:
                 individual.fitness()
-                # Uncomment do debug
-                # print(f"Generation: {generation} New population: {individual.chromosome} - Travelled Distance: {individual.travelled_distance}")
+                # if self.verbose:
+                #     print(f"Generation: {generation} New population: {individual.chromosome} - Travelled Distance: {individual.travelled_distance}")
                 # print(f"Generation: {generation} - Travelled Distance: {individual.travelled_distance}")
 
             # print(f"Last individual: {individual.chromosome}")
@@ -149,7 +151,7 @@ class GeneticAlgorithm:
         ]
 
 
-def run(event=None, test=False):
+def run(event=None, test=False, verbose=False):
     """
     event example:
     event = {
@@ -193,7 +195,7 @@ def run(event=None, test=False):
 
         time_distances = [city.distances for city in cities_list]
 
-        ga = GeneticAlgorithm(population_size)
+        ga = GeneticAlgorithm(population_size=population_size, verbose=verbose)
         result = ga.resolve(mutation_rate, min_generations, time_distances, cities_list)
 
         to_return = {
